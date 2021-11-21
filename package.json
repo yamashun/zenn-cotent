@@ -1,0 +1,23 @@
+{
+  "name": "zenn-cotent",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yamashun/zenn-cotent.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yamashun/zenn-cotent/issues"
+  },
+  "homepage": "https://github.com/yamashun/zenn-cotent#readme",
+  "dependencies": {
+    "zenn-cli": "^0.1.98"
+  }
+}
