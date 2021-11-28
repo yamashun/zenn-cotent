@@ -1,5 +1,5 @@
 ---
-title: "NginxのリバースプロキシでHTTP/2で通信する"
+title: "NginxのリバースプロキシでHTTP/2を試す"
 emoji: "🐶"
 type: "tech"
 topics: ["nginx", "http2"]
@@ -9,11 +9,7 @@ published: false
 # はじめに
 Nginxをproxyとして使う場合にHTTPではなくHTTP/2で通信したい場合がある。
 どのようにするかはNginxのconfigに `http2` を追加してあげるだけですが、実際に試して動作確認できるように簡単なサンプルとその際の設定を書いていきます。
-
-動作確認はxxxxxで行っています。
-
-※M1 Macで確認しているので arm64のイメージになっています
-
+※ このサンプルはM1 Macで動作確認しています
 
 # サンプルアプリケーションを動作させる
 ## Hello goアプリケーション
@@ -192,7 +188,7 @@ server {
 
 ```
 # 設定反映
-% dc up --build -d
+% docker compose up --build -d
 
 # 動作確認
 % curl -k -I https://localhost
