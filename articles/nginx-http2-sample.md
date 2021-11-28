@@ -7,7 +7,7 @@ published: false
 ---
 
 # はじめに
-Nginxをproxyとして使う場合にHTTPではなくHTTP/2で受けたい場合がある。
+Nginxをproxyとして使う場合にHTTPではなくHTTP/2で通信したい場合がある。
 どのようにするかはNginxのconfigに `http2` を追加してあげるだけですが、実際に試して動作確認できるように簡単なサンプルとその際の設定を書いていきます。
 
 動作確認はxxxxxで行っています。
@@ -20,7 +20,7 @@ Nginxをproxyとして使う場合にHTTPではなくHTTP/2で受けたい場合
 動作確認用の簡単なGoアプリケーションを用意します。
 リクエストを受け取って `Hello go!!` と返すだけのアプリケーションです。
 
-```go
+```go:main.go
 package main
 
 import (
@@ -45,11 +45,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 ```
 
 ## docker composeで起動
-nginxとgoを動かすためのDockerfileを用意してdocker composeでまとめて起動できるようにします。
+NginxとGoアプリケーションを動かすためのDockerfileを用意してdocker composeでまとめて起動できるようにします。
 
 
-```docker
-# Dockerfile
+```docker:Dockerfile
 FROM arm64v8/golang:1.17
 
 WORKDIR /go/src/app
@@ -58,16 +57,14 @@ COPY ./main.go ./main.go
 CMD ["go", "run", "main.go"]
 ```
 
-```
-# DockerfileNginx
+```docker:DockerfileNginx
 FROM nginx
 
 # デフォルトのnginx imageの設定を上書きする
 COPY etc/go-app.conf /etc/nginx/conf.d/default.conf
 ```
 
-```
-# etc/go-app.conf
+```text:etc/go-app.conf
 server {
     listen       80;
     listen  [::]:80;
@@ -87,7 +84,6 @@ server {
 ```
 
 ```yml:docker-compose.yml
-# docker-compose.yml
 version: '3.8'
 services:
   app:
@@ -106,7 +102,7 @@ services:
 
 動作確認
 
-```
+```bash
 % docker compose up -d
 % docker compose ps
 NAME                COMMAND                  SERVICE             STATUS              PORTS
@@ -118,26 +114,25 @@ Hello go!!
 
 curlを`-i`オプションで実行するとHTTP/1.1で通信していることがわかる
 
-```
+```bash
 % curl -i localhost:80
 HTTP/1.1 200 OK
 ```
 
 ## 自己証明書を使ってhttpsで動かす
 HTTP/2自体は仕様上はHTTPSに限らずHTTPの通信にも対応していますが、主要ブラウザーがTLS拡張のみを対応するなど実際にWebサービスで使う場合はHTTPS前提になる場合がほとんどだと思います。
-そのため、自己証明書を使ってHTTPSで動くようにします。
+そのため、自己証明書を使ってHTTPSで動くようにしていきます。
 
 証明書作成
 
-```zsh
+```bash
 % mdkir ./ssl
 % openssl req -new -x509 -sha256 -newkey rsa:2048 -days 365 -nodes -out ./ssl/ssl.pem -keyout ./ssl/ssl.key
 ```
 
 作成した証明書をnginxで使用する
 
-```yml
-# docker-compose.yml
+```yml:docker-compose.yml
 ---
 version: '3.8'
 services:
@@ -157,8 +152,7 @@ services:
 +      - ./ssl:/ssl
 ```
 
-```
-# etc/go-app.conf
+```text:etc/go-app.conf
 server {
 +    listen       443 ssl;
 +    listen  [::]:443 ssl;
@@ -189,7 +183,7 @@ Hello go!!
 
 ようやく本題にたどり着きましたが、やることは以下のようにnginxのconifgファイルにhttp2を追加するだけです。
 
-```
+```text:etc/go-app.conf
 server {
 +    listen       443 ssl http2;
 +    listen  [::]:443 ssl http2;
@@ -211,7 +205,7 @@ HTTP/2で通信していることが確認できました🎉
 HTTP/2で通信しようとしているかは `-v` オプションをつけて実行することで確認できます。
 
 以下のように `ALPN, offering h2` が表示されればHTTP/2で通信しようとしてくれています。
-わたしの環境だと最初はh2が出ていなかったのでcurlを入れ直したら表示されレスポンスもHTTP/2と表示されるようになりました。
+自分の環境だと最初はh2が出ていなかったためcurlを入れ直することで、h2が表示されレスポンスもHTTP/2と表示されるようになりました。
 
 ```
 % curl -k -v https://localhost
@@ -223,7 +217,7 @@ HTTP/2で通信しようとしているかは `-v` オプションをつけて�
 
 # まとめ
 nginxをproxyサーバーとしてHTTP/2で通信する方法を簡単なアプリケーションで試してみました。
-設定自体はすごく簡単なものですが、試す中でHTTP/2やそのプロトコルネゴシエーションの仕様、周辺ツールの対応状況なども知ることができてよかったです。
+設定自体はすごく簡単なものですが、試す中でHTTP/2やそのプロトコルネゴシエーションの仕様や、周辺ツールの対応状況なども知ることができてよかったです。
 
 
 # 余談：SSL/TLSなしでHTTP2を動かすことができるか
