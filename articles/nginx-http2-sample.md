@@ -3,7 +3,7 @@ title: "NginxのリバースプロキシでHTTP/2を試す"
 emoji: "🐶"
 type: "tech"
 topics: ["nginx", "http2"]
-published: false
+published: true
 ---
 
 # はじめに
@@ -123,7 +123,9 @@ HTTP/2自体は仕様上はHTTPSに限らずHTTPの通信にも対応してい�
 
 ```bash
 % mdkir ./ssl
-% openssl req -new -x509 -sha256 -newkey rsa:2048 -days 365 -nodes -out ./ssl/ssl.pem -keyout ./ssl/ssl.key
+% openssl genrsa -out ssl/server.key 2048
+% openssl req -new -key ssl/server.key -out ssl/server.csr
+% openssl x509 -req -days 3650 -signkey ssl/server.key < ssl/server.csr > ssl/server.crt
 ```
 
 作成した証明書をnginxで使用する
@@ -154,8 +156,8 @@ server {
 +    listen  [::]:443 ssl;
     server_name  localhost;
 
-+    ssl_certificate /ssl/ssl.pem;
-+    ssl_certificate_key /ssl/ssl.key;
++    ssl_certificate /ssl/server.crt;
++    ssl_certificate_key /ssl/server.key;
 
     location / {
         proxy_pass   http://app:9000/;
@@ -214,6 +216,8 @@ HTTP/2で通信しようとしているかは `-v` オプションをつけて�
 # まとめ
 nginxをproxyサーバーとしてHTTP/2で通信する方法を簡単なアプリケーションで試してみました。
 設定自体はすごく簡単なものですが、試す中でHTTP/2やそのプロトコルネゴシエーションの仕様や、周辺ツールの対応状況なども知ることができてよかったです。
+
+今回使用したコードは[こちら](https://github.com/yamashun/nginx-go)になります。
 
 
 # 余談：SSL/TLSなしでHTTP2を動かすことができるか
