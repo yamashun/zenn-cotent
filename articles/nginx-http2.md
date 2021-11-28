@@ -1,5 +1,13 @@
+---
+title: "NginxのリバースプロキシでHTTP/2で通信する"
+emoji: "🐶"
+type: "tech"
+topics: ["nginx", "http2"]
+published: false
+---
+
 # はじめに
-nginxをproxyとして使う場合にHTTPではなくHTTP/2で受けたい場合がある。
+Nginxをproxyとして使う場合にHTTPではなくHTTP/2で受けたい場合がある。
 どのようにするかはNginxのconfigに `http2` を追加してあげるだけですが、実際に試して動作確認できるように簡単なサンプルとその際の設定を書いていきます。
 
 動作確認はxxxxxで行っています。
