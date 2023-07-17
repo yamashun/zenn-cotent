@@ -3,7 +3,7 @@ title: "Railsの複数データベースでconnected_toを使う際はクエリ�
 emoji: "🐰"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: [Rails]
-published: false
+published: true
 ---
 
 Railsの複数データベース機能利用時に意図せずに無駄なクエリ(SQL)を実行しているケースに遭遇したため、そのことについて書いていきます。
