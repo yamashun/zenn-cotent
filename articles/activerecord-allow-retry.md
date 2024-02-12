@@ -1,9 +1,9 @@
 ---
 title: "【Rails】ActiveRecordのallow_retryを使ったクエリのリトライ処理の実装"
-emoji: "🥶"
+emoji: "🔨"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: [Rails]
-published: false
+published: true
 ---
 
 Railsの7.1でActiveRecordのクエリのリトライを可能とする `allow_retry` というオプションが内部のメソッドに追加されました。現時点では公開APIではないため、ドキュメントにはのっていませんがパッチを当てることで利用することはできます。
