@@ -1,5 +1,5 @@
 ---
-title: "【Rails】ActiveRecordのallow_retryオプションを使ったクエリのリトライ処理の実装"
+title: "【Rails】ActiveRecordのallow_retryを使ったクエリのリトライ処理の実装"
 emoji: "🥶"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: [Rails]
@@ -34,8 +34,9 @@ https://github.com/rails/rails/pull/46273
 将来的に公開APIとなることもあるかもしれません。
 
 ## ユースケース
-実際に自分が利用したケースとしては、データベースを負荷状況によってスケールイン/スケールアウトするような運用において、**スケールイン中に停止しようとしているDBに対してクエリを実行しようとした場合にコネクションがロスト**してクエリ実行に失敗することがあります。
-このような場合、コネクションを貼り直して残ったDBに対してリトライしたいといったことがあります。
+色んなケースがあると思いますが実際に自分が利用した例としては、データベースを負荷状況によってスケールイン/スケールアウトするような運用におけるリトライです。
+
+**スケールイン中に停止しようとしているDBに対してクエリを実行しようとした場合にコネクションがロスト**してクエリ実行に失敗します。このような場合にコネクションを貼り直して残ったDBに対してリトライしたいといったケースです。
 
 MySQLの場合は[activerecord-mysql-reconnect](https://github.com/winebarrel/activerecord-mysql-reconnect)というgemが便利でお世話になってしまいたがRails6.0までの対応で現在はPublic archiveとなっています。
 
@@ -75,9 +76,9 @@ ActiveRecord::ConnectionAdapters::Mysql2::DatabaseStatements.prepend(DatabaseSta
 ### debug用コード
 raw_executeメソッド内にdebuggerを仕込みます。
 
-```ruby:lib/active_record/connection_adapters/mysql2/database_statements.rb
+```diff ruby:lib/active_record/connection_adapters/mysql2/database_statements.rb
 def raw_execute(sql, name, async: false, allow_retry: false, materialize_transactions: true)
-  debugger
++  debugger
   log(sql, name, async: async) do
     with_raw_connection(allow_retry: allow_retry, materialize_transactions: materialize_transactions) do |conn|
       sync_timezone_changes(conn)
@@ -126,7 +127,7 @@ raw_executeメソッドのdebuggerで処理が止まるのでbacktraceを実行�
 本記事では割愛しますが、createやupdateなどのCRUD用のメソッドを実行する場合も同様にraw_executeを通ります。
 debuggerで中断した状態でMySQLを再起動した後に処理を再開してみるとクエリが実行されることを確認できます。
 
-また、モンキーパッチを当てていない状態で同様の手順を行うと以下のエラーが発生するためリトライが動作していることがわかります。
+また、モンキーパッチを当てていない状態で同様の手順を行うと以下のエラーが発生するためパッチによってリトライが動作していることがわかります。
 
 ```
 Mysql2::Error::ConnectionError: Lost connection to server during query (ActiveRecord::ConnectionFailed)
@@ -136,7 +137,7 @@ Mysql2::Error::ConnectionError: Lost connection to server during query (ActiveRe
 次にリトライされる条件を見ていきます。
 
 リトライを行うかどうかはここでrescueした後の処理で行っています。
-https://github.com/rails/rails/blob/6b93fff8af32ef5e91f4ec3cfffb081d0553faf0/activerecord/lib/active_record/connection_adapters/abstract_adapter.rb#L1028
+https://github.com/rails/rails/blob/6b93fff8af32ef5e91f4ec3cfffb081d0553faf0/activerecord/lib/active_record/connection_adapters/abstract_adapter.rb#L1029
 
 ```ruby:activerecord/lib/active_record/connection_adapters/abstract_adapter.rb
 begin
@@ -285,4 +286,4 @@ ActiveRecord::ConnectionAdapters::Trilogy::DatabaseStatements.prepend(DatabaseSt
 クエリのリトライを可能とする `allow_retry` オプションについて、実装例を元に動作の説明などを行いました。
 `allow_retry` が追加されたことによって、リトライ処理をかなり楽に書けるようになったので必要な場合はパッチを当てるのも選択肢となるのではないでしょうか。
 
-但し、ActiveRecordの内部のコードは頻繁に修正が入るため、新しいバージョンで動作しなくなる可能性も高いです。利用する場合は関連する修正をキャッチアップするつもりで使いましょう
+但し、ActiveRecordの内部のコードは頻繁に修正が入るため、新しいバージョンで動作しなくなる可能性も高いです。また挙動を全て理解することも難しいです。利用する場合はそのリスクを理解した上で関連する修正をキャッチアップするつもりで使っていきましょう。
