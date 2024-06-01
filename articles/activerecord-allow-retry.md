@@ -265,7 +265,7 @@ ActiveRecord::ConnectionAdapters::DatabaseStatements.prepend(DatabaseStatementsM
 MySQLのアダプターとしてmysql2以外に[trilogy](https://github.com/trilogy-libraries/trilogy)があります。
 trilogyにおいても同様のことが可能です。
 
-```ruby:lib/active_record/connection_adapters/mysql2/database_statements.rb
+```ruby:config/initializers/database_statements_monkey_patch.rb
 require 'active_record/connection_adapters/trilogy/database_statements.rb'
 
 unless ActiveRecord.version == "7.1.2"
