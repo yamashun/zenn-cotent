@@ -3,7 +3,7 @@ title: "GASによるGoogle Sheetsのグラフ調整でドキュメントに書�
 emoji: "🐙"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["gas", "googlesheets"]
-published: false
+published: true
 ---
 
 ## はじめに
