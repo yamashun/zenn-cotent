@@ -3,7 +3,7 @@ title: "【Rails】Bootbootを使ったDual Boot Upgradeの実践"
 emoji: "🐥"
 type: "tech"
 topics: [Rails, Ruby]
-published: false
+published: true
 ---
 
 Railsアプリケーションのアップグレード手法の一つにDual Boot Upgradeがあります。
