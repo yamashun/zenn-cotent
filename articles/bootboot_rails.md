@@ -2,7 +2,7 @@
 title: "【Rails】Bootbootを使ったDual Boot Upgradeの実践"
 emoji: "🐥"
 type: "tech"
-topics: [Rails]
+topics: [Rails, Ruby]
 published: false
 ---
 
@@ -19,7 +19,7 @@ https://github.com/Shopify/bootboot
 詳しく知りたい方には[RAILS CONFERENCE 2022 AND THE DUAL BOOT UPGRADE STRATEGY](https://blog.grio.com/2022/06/rails-conference-2022-and-the-dual-boot-upgrade-strategy.html)の記事がおすすめです。
 
 ## Bootbootを試す
-早速Bootbootを使って試していきます。
+早速ですがBootbootを試していきます。
 
 ### 準備
 Gemfileにpluginを追加し
