@@ -65,10 +65,42 @@ ActiveRecord::ConnectionAdapters::Mysql2::DatabaseStatements.prepend(DatabaseSta
 ※ executeではなくraw_executeにパッチを当てるのは、[Refactor Mysql2Adapter and TrilogyAdapter](https://github.com/rails/rails/pull/48054)の修正で、内部のメソッドからexecuteを呼ばないようにする修正が入りました。この修正によってfind, where, create, upate, destroy など良く使われる公開メソッドで `execute` メソッドを経由しなくなったためです。
 
 動作確認は以下で行っています。
-- Rails: 7.1.2
+- Rails: **7.1.2**
 - Ruby: 3.2.2
 - adapter: mysql2(0.5.5)
 - MySQL: 8.0
+
+
+
+### Rails8.0での変更について（2025/1/13 追記）
+:::message
+Rails8.0でリトライやraw_executeメソッドに関連するいくつかの修正が入っています。
+:::
+
+- https://github.com/rails/rails/pull/52428
+  - リファクタリングによるraw_executeメソッドが実装されるモジュールの変更とraw_executeメソッドに引数（prepare, binds）追加
+- https://github.com/rails/rails/pull/51336
+  - Rails側で構築する安全と思われるクエリ（findで実行するselectクエリなど）はデフォルトでallow_retryがtrueとなる
+- https://github.com/rails/rails/pull/52466
+  - raw_executeメソッドにキーワード引数追加
+
+それに伴いモンキーパッチにも修正が必要になります。
+以下は修正例です。
+
+```ruby:config/initializers/database_statements_monkey_patch.rb
+require 'active_record/connection_adapters/abstract/database_statements.rb'
+
+module DatabaseStatementsMonkeyPatch
+  def raw_execute(sql, name = nil, binds = [], prepare: false, async: false, allow_retry: false, materialize_transactions: true, batch: false) # 引数の追加（binds, prepare, batch）
+    allow_retry = true
+    super
+  end
+end
+
+ActiveRecord::ConnectionAdapters::DatabaseStatements.prepend(DatabaseStatementsMonkeyPatch) # prependするmoduleの変更
+```
+
+また、デフォルトで一部のselectクエリなどが[リトライされるようになった](https://github.com/rails/rails/pull/51336)ため、使い方によってはこのモンキーパッチ自体を削除してもよいかもしれません。
 
 ## コードの調査
 上記のパッチで実際にクエリがリトライされるか確認します
