@@ -3,7 +3,7 @@ title: "Sidekiqのキューの重み付け使用時に起こしがちな失敗"
 emoji: "🦶"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: [Rails, Sidekiq]
-published: false
+published: true
 ---
 
 Sidekiqでは、キューの重み付け設定によってJobに優先度をつけることができます。
